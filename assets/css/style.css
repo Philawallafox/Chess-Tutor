@@ -55,7 +55,28 @@ main {
 }
 
 #demo-board {
-    margin: 30px auto;
+    margin: 20px auto;
+}
+
+.theme-selector {
+    margin: 15px auto;
+    text-align: center;
+    max-width: 300px;
+}
+
+.theme-selector label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.theme-selector select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
 }
 
 .btn {
@@ -65,6 +86,7 @@ main {
     padding: 10px 20px;
     text-decoration: none;
     border-radius: 5px;
+    margin-top: 15px;
 }
 
 footer {
@@ -72,6 +94,33 @@ footer {
     padding: 20px 0;
     border-top: 1px solid #eee;
     font-size: 0.9em;
+}
+
+/* Acknowledgments Page Styles */
+.acknowledgments {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.acknowledgments h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.acknowledgments h3 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    color: #4a6ea9;
+}
+
+.acknowledgments ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.acknowledgments li {
+    margin-bottom: 5px;
 }
 
 /* Responsive Design */
@@ -85,6 +134,24 @@ footer {
     }
     
     #demo-board {
-        width: 250px !important;
+        width: 280px !important;
+    }
+    
+    .theme-selector {
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    #demo-board {
+        width: 240px !important;
+    }
+    
+    .theme-selector {
+        max-width: 240px;
+    }
+    
+    body {
+        padding: 0 10px;
     }
 }

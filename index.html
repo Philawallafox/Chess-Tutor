@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Tutor</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+</head>
+<body>
+    <header>
+        <h1>Chess Tutor</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="learn.html">Learn</a></li>
+                <li><a href="practice.html">Practice</a></li>
+                <li><a href="acknowledgments.html">Acknowledgments</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="intro">
+            <h2>Learn Chess Openings for Free</h2>
+            <p>Master essential chess openings using classical principles from public domain resources.</p>
+            
+            <div id="demo-board" style="width: 350px; margin: 0 auto;"></div>
+            
+            <div class="theme-selector">
+                <label for="piece-theme">Choose piece style:</label>
+                <select id="piece-theme">
+                    <option value="wikipedia">Wikipedia (Classic)</option>
+                    <option value="alpha">Alpha</option>
+                    <option value="uscf">USCF</option>
+                    <option value="merida">Merida</option>
+                </select>
+            </div>
+            
+            <a href="learn.html" class="btn">Start Learning</a>
+        </section>
+    </main>
