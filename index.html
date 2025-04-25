@@ -6,6 +6,32 @@
     <title>Chess Tutor</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <style>
+        .board-controls {
+            margin: 15px auto;
+            text-align: center;
+        }
+        
+        .board-controls button {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .board-controls button:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .instructions {
+            margin: 15px auto;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -33,9 +59,18 @@
                     <option value="wikipedia">Wikipedia (Classic)</option>
                     <option value="alpha">Alpha</option>
                     <option value="uscf">USCF</option>
-                    <option value="merida">Merida</option>
+                    <!-- Temporarily removed due to loading issues -->
+                    <!-- <option value="merida">Merida</option> -->
                 </select>
             </div>
+            
+            <div class="board-controls">
+                <button id="start-position">Start Position</button>
+                <button id="play-opening">Play Opening</button>
+                <button id="flip-board">Flip Board</button>
+            </div>
+            
+            <p class="instructions">You can move the pieces! Try exploring some opening moves.</p>
             
             <a href="learn.html" class="btn">Start Learning</a>
         </section>
@@ -50,72 +85,131 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     
-    <!-- Inline initialization script to ensure the board loads -->
     <script>
-        // Wait for page to fully load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Global variables
-            let board = null;
-            let game = null;
-            let currentTheme = 'wikipedia';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Global variables
+        let board = null;
+        let game = null;
+        let currentTheme = 'wikipedia';
+        
+        // Initialize chess game
+        game = new Chess();
+        
+        // Check for legal moves
+        function onDragStart(source, piece, position, orientation) {
+            // Don't allow moving pieces if the game is over
+            if (game.game_over()) return false;
             
-            // Try to load saved theme
-            const savedTheme = localStorage.getItem('chessTheme');
-            if (savedTheme) {
-                currentTheme = savedTheme;
-                document.getElementById('piece-theme').value = savedTheme;
+            // Only allow moving pieces of the current turn
+            if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+                (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                return false;
             }
             
-            // Initialize chess game
-            game = new Chess();
+            return true;
+        }
+        
+        // Update the board after a move
+        function onDrop(source, target) {
+            // Check if the move is legal
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Always promote to queen for simplicity
+            });
             
-            // Initialize the board
-            try {
+            // If illegal move, snap back
+            if (move === null) return 'snapback';
+            
+            // Update the board with the new position
+            board.position(game.fen());
+        }
+        
+        // Load saved theme if available
+        const savedTheme = localStorage.getItem('chessTheme');
+        if (savedTheme) {
+            currentTheme = savedTheme;
+            const themeSelector = document.getElementById('piece-theme');
+            // Only set if the option exists in the dropdown
+            if ([...themeSelector.options].some(opt => opt.value === savedTheme)) {
+                themeSelector.value = savedTheme;
+            } else {
+                // If saved theme isn't in the dropdown, default to wikipedia
+                currentTheme = 'wikipedia';
+            }
+        }
+        
+        // Initialize the board
+        try {
+            // Use a direct link to the chessboardjs.com site
+            const pieceUrl = 'https://chessboardjs.com/img/chesspieces/' + currentTheme + '/{piece}.png';
+            
+            board = Chessboard('demo-board', {
+                position: 'start',
+                pieceTheme: pieceUrl,
+                draggable: true,
+                onDragStart: onDragStart,
+                onDrop: onDrop
+            });
+            
+            console.log('Board initialized with theme:', currentTheme);
+            
+            // Handle theme changes
+            document.getElementById('piece-theme').addEventListener('change', function(e) {
+                // Update theme
+                currentTheme = e.target.value;
+                localStorage.setItem('chessTheme', currentTheme);
+                
+                // Save current position
+                const currentPosition = board.position();
+                
+                // Recreate board with new theme
+                board.destroy();
                 board = Chessboard('demo-board', {
-                    position: 'start',
-                    pieceTheme: `https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/img/chesspieces/${currentTheme}/{piece}.png`
+                    position: currentPosition,
+                    pieceTheme: 'https://chessboardjs.com/img/chesspieces/' + currentTheme + '/{piece}.png',
+                    draggable: true,
+                    onDragStart: onDragStart,
+                    onDrop: onDrop
                 });
+            });
+            
+            // Add button event listeners
+            document.getElementById('start-position').addEventListener('click', function() {
+                game.reset();
+                board.start();
+            });
+            
+            document.getElementById('flip-board').addEventListener('click', function() {
+                board.flip();
+            });
+            
+            document.getElementById('play-opening').addEventListener('click', function() {
+                // Reset board
+                game.reset();
+                board.start();
                 
-                console.log('Board initialized successfully');
+                // Play Ruy Lopez opening
+                const moves = ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'];
+                let moveIndex = 0;
                 
-                // Handle theme changes
-                document.getElementById('piece-theme').addEventListener('change', function(e) {
-                    currentTheme = e.target.value;
-                    localStorage.setItem('chessTheme', currentTheme);
-                    
-                    // Get current position
-                    const currentPosition = board.position();
-                    
-                    // Destroy and recreate the board with new theme
-                    board.destroy();
-                    board = Chessboard('demo-board', {
-                        position: currentPosition,
-                        pieceTheme: `https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/img/chesspieces/${currentTheme}/{piece}.png`
-                    });
-                });
-                
-                // Demonstrate opening moves after a delay
-                setTimeout(function() {
-                    // King's Pawn opening moves
-                    const moves = ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'];
-                    let moveIndex = 0;
-                    
-                    function makeNextMove() {
-                        if (moveIndex < moves.length) {
-                            game.move(moves[moveIndex]);
-                            board.position(game.fen());
-                            moveIndex++;
-                            setTimeout(makeNextMove, 1200);
-                        }
+                function makeNextMove() {
+                    if (moveIndex < moves.length) {
+                        game.move(moves[moveIndex]);
+                        board.position(game.fen());
+                        moveIndex++;
+                        setTimeout(makeNextMove, 1000);
                     }
-                    
-                    makeNextMove();
-                }, 1000);
+                }
                 
-            } catch (error) {
-                console.error('Error initializing chessboard:', error);
-            }
-        });
+                setTimeout(makeNextMove, 500);
+            });
+            
+        } catch (error) {
+            console.error('Error initializing chessboard:', error);
+            alert('There was an error loading the chessboard. Please check the console for details.');
+        }
+    });
     </script>
 </body>
 </html>
