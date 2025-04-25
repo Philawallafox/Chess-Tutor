@@ -169,10 +169,8 @@ async function getOpeningMainLine(openingId) {
 }
 */
 
-// Export the functions for use in other modules
-export {
-    loadOpeningsDatabase,
-    getOpeningsList,
-    getOpeningDetails,
-    getOpeningMainLine
-};
+// Make functions available globally (since we're not using modules)
+window.loadOpeningsDatabase = loadOpeningsDatabase;
+window.getOpeningsList = getOpeningsList;
+window.getOpeningDetails = getOpeningDetails;
+window.getOpeningMainLine = getOpeningMainLine;
