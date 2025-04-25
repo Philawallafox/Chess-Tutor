@@ -40,3 +40,82 @@
             <a href="learn.html" class="btn">Start Learning</a>
         </section>
     </main>
+
+    <footer>
+        <p>&copy; 2025 Chess Tutor | <a href="acknowledgments.html">Acknowledgments</a></p>
+    </footer>
+
+    <!-- Load libraries in the correct order -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    
+    <!-- Inline initialization script to ensure the board loads -->
+    <script>
+        // Wait for page to fully load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Global variables
+            let board = null;
+            let game = null;
+            let currentTheme = 'wikipedia';
+            
+            // Try to load saved theme
+            const savedTheme = localStorage.getItem('chessTheme');
+            if (savedTheme) {
+                currentTheme = savedTheme;
+                document.getElementById('piece-theme').value = savedTheme;
+            }
+            
+            // Initialize chess game
+            game = new Chess();
+            
+            // Initialize the board
+            try {
+                board = Chessboard('demo-board', {
+                    position: 'start',
+                    pieceTheme: `https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/img/chesspieces/${currentTheme}/{piece}.png`
+                });
+                
+                console.log('Board initialized successfully');
+                
+                // Handle theme changes
+                document.getElementById('piece-theme').addEventListener('change', function(e) {
+                    currentTheme = e.target.value;
+                    localStorage.setItem('chessTheme', currentTheme);
+                    
+                    // Get current position
+                    const currentPosition = board.position();
+                    
+                    // Destroy and recreate the board with new theme
+                    board.destroy();
+                    board = Chessboard('demo-board', {
+                        position: currentPosition,
+                        pieceTheme: `https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/img/chesspieces/${currentTheme}/{piece}.png`
+                    });
+                });
+                
+                // Demonstrate opening moves after a delay
+                setTimeout(function() {
+                    // King's Pawn opening moves
+                    const moves = ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'];
+                    let moveIndex = 0;
+                    
+                    function makeNextMove() {
+                        if (moveIndex < moves.length) {
+                            game.move(moves[moveIndex]);
+                            board.position(game.fen());
+                            moveIndex++;
+                            setTimeout(makeNextMove, 1200);
+                        }
+                    }
+                    
+                    makeNextMove();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error initializing chessboard:', error);
+            }
+        });
+    </script>
+</body>
+</html>
