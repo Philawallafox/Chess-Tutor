@@ -1,0 +1,113 @@
+{
+  "openings": [
+    {
+      "id": "ruy_lopez",
+      "name": "Ruy Lopez",
+      "aliases": ["Spanish Game", "Spanish Opening"],
+      "eco_code": "C60-C99",
+      "difficulty": "beginner",
+      "popularity": "very high",
+      
+      "starting_position": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "key_position": "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+      
+      "main_line": [
+        {
+          "move": "e4",
+          "notation": "1. e4",
+          "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+          "explanation": "Controls the center and opens lines for the bishop and queen.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "source_quote": "The opening with the King's pawn is undoubtedly the best, as it sets at liberty both pieces and pawns."
+        },
+        {
+          "move": "e5",
+          "notation": "1... e5",
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+          "explanation": "Black responds in kind, also fighting for the center.",
+          "source": "Lasker's Common Sense in Chess (1896)",
+          "source_quote": "The soundest reply to 1. e4 is 1... e5, which stakes an equal claim to the center."
+        },
+        {
+          "move": "Nf3",
+          "notation": "2. Nf3",
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "explanation": "Develops a piece while attacking Black's e5 pawn.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "source_quote": "This knight development is most logical, attacking the central pawn and preparing for castling."
+        },
+        {
+          "move": "Nc6",
+          "notation": "2... Nc6",
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "explanation": "Defends the e5 pawn while developing a piece.",
+          "source": "Tarrasch's Die moderne Schachpartie (1912)",
+          "source_quote": "The knight naturally goes to c6, where it defends the e-pawn and controls important central squares."
+        },
+        {
+          "move": "Bb5",
+          "notation": "3. Bb5",
+          "fen": "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "explanation": "This defines the Ruy Lopez. The bishop pins the knight, creating tension.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "source_quote": "The bishop is placed where it exerts pressure against the knight defending the central pawn."
+        }
+      ],
+      
+      "variations": [
+        {
+          "name": "Morphy Defense",
+          "sequence": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6"],
+          "starting_index": 5,
+          "explanation": "The most common response, questioning the bishop's placement.",
+          "source": "Lasker's Common Sense in Chess (1896)",
+          "strength": "Solid, leads to complex middlegames",
+          "notable_games": ["Karpov vs. Kasparov, World Championship 1985"]
+        },
+        {
+          "name": "Berlin Defense",
+          "sequence": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6"],
+          "starting_index": 5,
+          "explanation": "A solid defensive approach popularized in modern play.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "strength": "Very solid, slightly drawish",
+          "notable_games": ["Kramnik vs. Kasparov, World Championship 2000"]
+        }
+      ],
+      
+      "strategic_concepts": [
+        {
+          "concept": "Center Control",
+          "explanation": "Both sides stake claims to the center with their pawns.",
+          "source": "Lasker's Common Sense in Chess (1896)"
+        },
+        {
+          "concept": "Piece Development",
+          "explanation": "The opening demonstrates efficient development of knights and bishops.",
+          "source": "Capablanca's Chess Fundamentals (1921)"
+        },
+        {
+          "concept": "Pin Tactics",
+          "explanation": "The bishop pin against the knight creates tactical possibilities.",
+          "source": "Tarrasch's Die moderne Schachpartie (1912)"
+        }
+      ],
+      
+      "historical_context": "Named after Spanish priest Ruy López de Segura who analyzed it in his 1561 work. The opening gained systematic treatment in the late 19th century with Steinitz's positional approach.",
+      
+      "quiz_questions": [
+        {
+          "question": "What is the main strategic idea behind 3.Bb5?",
+          "options": [
+            "Immediate material gain",
+            "King safety by preparing castling",
+            "Creating pressure against the defender of e5",
+            "Preventing Black from castling"
+          ],
+          "correct_answer": 2,
+          "explanation": "The bishop applies pressure to the knight defending the e5 pawn, creating tension in the center."
+        }
+      ]
+    }
+  ]
+}

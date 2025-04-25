@@ -98,3 +98,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Load opening database
+async function loadOpeningsDatabase() {
+    try {
+        const response = await fetch('data/openings.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.openings;
+    } catch (error) {
+        console.error('Error loading openings database:', error);
+        return [];
+    }
+}
