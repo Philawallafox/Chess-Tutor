@@ -1,0 +1,52 @@
+{
+  "openings": [
+    {
+      "id": "ruy_lopez",
+      "name": "Ruy Lopez",
+      "difficulty": "beginner",
+      "popularity": "very high",
+      "key_position": "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+      "file": "openings/ruy_lopez.json"
+    },
+    {
+      "id": "italian_game",
+      "name": "Italian Game",
+      "difficulty": "beginner",
+      "popularity": "high",
+      "key_position": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+      "file": "openings/italian_game.json"
+    },
+    {
+      "id": "sicilian_defense",
+      "name": "Sicilian Defense",
+      "difficulty": "intermediate",
+      "popularity": "very high",
+      "key_position": "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2",
+      "file": "openings/sicilian_defense.json"
+    },
+    {
+      "id": "french_defense",
+      "name": "French Defense",
+      "difficulty": "intermediate",
+      "popularity": "high",
+      "key_position": "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+      "file": "openings/french_defense.json"
+    },
+    {
+      "id": "kings_gambit",
+      "name": "King's Gambit",
+      "difficulty": "intermediate",
+      "popularity": "medium",
+      "key_position": "rnbqkbnr/pppppppp/8/8/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2",
+      "file": "openings/kings_gambit.json"
+    },
+    {
+      "id": "queens_gambit",
+      "name": "Queen's Gambit",
+      "difficulty": "intermediate",
+      "popularity": "very high",
+      "key_position": "rnbqkbnr/pppppppp/8/8/2PP4/8/PP2PPPP/RNBQKBNR b KQkq d3 0 2",
+      "file": "openings/queens_gambit.json"
+    }
+  ]
+}

@@ -108,6 +108,115 @@
           "explanation": "The bishop applies pressure to the knight defending the e5 pawn, creating tension in the center."
         }
       ]
+    },
+    {
+      "id": "italian_game",
+      "name": "Italian Game",
+      "aliases": ["Giuoco Piano"],
+      "eco_code": "C50-C54",
+      "difficulty": "beginner",
+      "popularity": "high",
+      
+      "starting_position": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "key_position": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+      
+      "main_line": [
+        {
+          "move": "e4",
+          "notation": "1. e4",
+          "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+          "explanation": "Controls the center and opens lines for the bishop and queen.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "source_quote": "The opening with the King's pawn is undoubtedly the best, as it sets at liberty both pieces and pawns."
+        },
+        {
+          "move": "e5",
+          "notation": "1... e5",
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+          "explanation": "Black responds in kind, also fighting for the center.",
+          "source": "Lasker's Common Sense in Chess (1896)",
+          "source_quote": "The soundest reply to 1. e4 is 1... e5, which stakes an equal claim to the center."
+        },
+        {
+          "move": "Nf3",
+          "notation": "2. Nf3",
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "explanation": "Develops a piece while attacking Black's e5 pawn.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "source_quote": "This knight development is most logical, attacking the central pawn and preparing for castling."
+        },
+        {
+          "move": "Nc6",
+          "notation": "2... Nc6",
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "explanation": "Defends the e5 pawn while developing a piece.",
+          "source": "Tarrasch's Die moderne Schachpartie (1912)",
+          "source_quote": "The knight naturally goes to c6, where it defends the e-pawn and controls important central squares."
+        },
+        {
+          "move": "Bc4",
+          "notation": "3. Bc4",
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "explanation": "The defining move of the Italian Game, developing the bishop to its most active square.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "source_quote": "The bishop aims at the sensitive f7-square, potentially creating tactical opportunities."
+        }
+      ],
+      
+      "variations": [
+        {
+          "name": "Giuoco Piano (Quiet Game)",
+          "sequence": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5"],
+          "starting_index": 5,
+          "explanation": "The most classical continuation, where Black mirrors White's bishop development.",
+          "source": "Tarrasch's Die moderne Schachpartie (1912)",
+          "strength": "Solid development, leading to strategic battles",
+          "notable_games": ["McDonnell vs. La Bourdonnais, London 1834"]
+        },
+        {
+          "name": "Two Knights Defense",
+          "sequence": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6"],
+          "starting_index": 5,
+          "explanation": "A more aggressive approach by Black, immediately counter-attacking.",
+          "source": "Steinitz's Modern Chess Instructor (1889)",
+          "strength": "Tactically sharp, good for counter-attack",
+          "notable_games": ["Morphy vs. Brunswick and Isouard, Paris Opera 1858"]
+        }
+      ],
+      
+      "strategic_concepts": [
+        {
+          "concept": "Development",
+          "explanation": "Both sides aim to rapidly develop pieces toward the center.",
+          "source": "Lasker's Common Sense in Chess (1896)"
+        },
+        {
+          "concept": "Central Control",
+          "explanation": "The control of the e4/e5 central squares shapes the character of the game.",
+          "source": "Tarrasch's Die moderne Schachpartie (1912)"
+        },
+        {
+          "concept": "King Safety",
+          "explanation": "The rapid development enables early castling, securing king safety.",
+          "source": "Capablanca's Chess Fundamentals (1921)"
+        }
+      ],
+      
+      "historical_context": "One of the oldest recorded openings, popular during the 16th-19th centuries. It was the main battleground for many of the earliest recorded master games and was extensively analyzed in the first chess books.",
+      
+      "quiz_questions": [
+        {
+          "question": "What is the key strategic idea of 3.Bc4?",
+          "options": [
+            "Controlling the long diagonal",
+            "Attacking the f7 square",
+            "Defending the e4 pawn",
+            "Preparing for queenside castling"
+          ],
+          "correct_answer": 1,
+          "explanation": "The bishop aims at the f7 square, which is only defended by the king, potentially creating tactical opportunities."
+        }
+      ]
     }
   ]
 }

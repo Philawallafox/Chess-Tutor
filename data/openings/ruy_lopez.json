@@ -1,0 +1,10 @@
+{
+  "id": "ruy_lopez",
+  "name": "Ruy Lopez",
+  "aliases": ["Spanish Game", "Spanish Opening"],
+  "eco_code": "C60-C99",
+  "difficulty": "beginner",
+  "popularity": "very high",
+  
+    "starting_position": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  }
