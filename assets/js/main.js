@@ -51,6 +51,7 @@
       onDrop: handleDrop,
       onSnapEnd: handleSnapEnd
     });
+    ChessApp.board.container = document.querySelector('#chessboard')
 
     ChessApp.engine = new ChessEngine({
       stockfishPath: ChessApp.config.stockfishPath,
