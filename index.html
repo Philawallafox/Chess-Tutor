@@ -4,83 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess Tutor</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- CSS files -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header>
-        <h1>Chess Tutor</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="learn.html">Learn</a></li>
-                <li><a href="practice.html">Practice</a></li>
-                <li><a href="acknowledgments.html">Acknowledgments</a></li>
-            </ul>
-        </nav>
+        <h1>Master essential chess openings using classical principles from public domain resources</h1>
     </header>
-
-    <main>
-        <section class="intro">
-            <h2>Learn Chess Openings for Free</h2>
-            <p>Master essential chess openings using classical principles from public domain resources.</p>
-            
-            <div class="board-container">
-                <div id="demo-board"></div>
-                <div id="evaluation-bar">
-                    <div class="eval-bar-inner"></div>
-                    <div class="eval-score">0.0</div>
-                </div>
+    
+    <div class="container">
+        <!-- The chessboard container MUST have the ID "chessboard" -->
+        <div id="chessboard" class="board-container"></div>
+        
+        <div class="controls">
+            <div>
+                <p class="eval-display" id="evaluation">0.0</p>
             </div>
             
-            <div class="theme-selector">
-                <label for="piece-theme">Choose piece style:</label>
-                <select id="piece-theme">
-                    <option value="wikipedia">Wikipedia (Classic)</option>
+            <div class="piece-style">
+                <label for="pieceStyle">Choose piece style:</label>
+                <select id="pieceStyle">
+                    <option value="USCF">USCF</option>
                     <option value="alpha">Alpha</option>
-                    <option value="uscf">USCF</option>
+                    <option value="cburnett">Cburnett</option>
+                    <option value="chess7">Chess7</option>
+                    <option value="chessnut">Chessnut</option>
+                    <option value="companion">Companion</option>
+                    <option value="leipzig">Leipzig</option>
+                    <option value="kosal">Kosal</option>
                 </select>
             </div>
             
-            <div class="board-controls">
-                <button id="start-position">Start Position</button>
-                <button id="play-opening">Play Opening</button>
-                <button id="flip-board">Flip Board</button>
+            <div class="move-method">
+                <p>Piece Movement Style:</p>
+                <div>
+                    <input type="radio" id="dragAndDrop" name="moveMethod" value="drag" checked>
+                    <label for="dragAndDrop">Drag and Drop</label>
+                </div>
+                <div>
+                    <input type="radio" id="clickToSelect" name="moveMethod" value="click">
+                    <label for="clickToSelect">Click to Select/Move</label>
+                </div>
+                <div>
+                    <input type="radio" id="algebraicNotation" name="moveMethod" value="algebraic">
+                    <label for="algebraicNotation">Algebraic Notation</label>
+                </div>
             </div>
             
-            <p class="instructions">You can move the pieces! Try exploring some opening moves.</p>
-            <p class="instructions">Right-click and drag to draw arrows on the board.</p>
-            
-            <a href="learn.html" class="btn">Start Learning</a>
-        </section>
-        
-        <section class="openings-preview">
-            <h2>Explore Chess Openings</h2>
-            <p>Click on any opening to see it demonstrated on the board above.</p>
-            <div id="openings-list" class="openings-grid">
-                <!-- Openings will be loaded here dynamically -->
-                <div class="loading">Loading openings...</div>
+            <div class="buttons">
+                <button id="startBtn">Start Position</button>
+                <button id="playOpening">Play Opening</button>
+                <button id="flipBoard">Flip Board</button>
+                <button id="clearArrowsBtn">Clear Arrows</button>
             </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Chess Tutor | <a href="acknowledgments.html">Acknowledgments</a></p>
-    </footer>
-
-    <!-- Load libraries in the correct order -->
+            
+            <div class="info">
+                <p>You can move the pieces! Try exploring some opening moves.</p>
+                <p>Right-click and drag to draw arrows on the board</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="learn-section">
+        <button id="startLearning">Start Learning</button>
+    </div>
+    
+    <!-- JavaScript files -->
+    <!-- jQuery is required by chessboard.js -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    
+    <!-- Load chess libraries from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     
-    <!-- Stockfish engine -->
-    <script src="assets/js/stockfish.js"></script>
+    <!-- Load Stockfish from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/stockfish@11.0.0/stockfish.js"></script>
     
-    <!-- Our application scripts -->
-    <script src="assets/js/database.js"></script>
-    <script src="assets/js/chess-engine.js"></script>
-    <script src="assets/js/move-explainer.js"></script>
-    <script src="assets/js/board-features.js"></script>
-    <script src="assets/js/main.js"></script>
+    <!-- Load custom application files -->
+    <script src="js/chess-engine.js"></script>
+    <script src="js/board-features.js"></script>
+    
+    <!-- Load main.js last -->
+    <script src="js/main.js"></script>
 </body>
 </html>
