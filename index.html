@@ -1,92 +1,84 @@
+# Revised index.html and assets/js/main.js
+
+---
+
+## index.html
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Tutor</title>
-    
-    <!-- CSS files -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Tutor</title>
+  <!-- Local CSS files -->
+  <link rel="stylesheet" href="assets/css/chessboard-1.0.0.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <header>
-        <h1>Master essential chess openings using classical principles from public domain resources</h1>
-    </header>
-    
-    <div class="container">
-        <!-- The chessboard container MUST have the ID "chessboard" -->
-        <div id="chessboard" class="board-container"></div>
-        
-        <div class="controls">
-            <div>
-                <p class="eval-display" id="evaluation">0.0</p>
-            </div>
-            
-            <div class="piece-style">
-                <label for="pieceStyle">Choose piece style:</label>
-                <select id="pieceStyle">
-                    <option value="USCF">USCF</option>
-                    <option value="alpha">Alpha</option>
-                    <option value="cburnett">Cburnett</option>
-                    <option value="chess7">Chess7</option>
-                    <option value="chessnut">Chessnut</option>
-                    <option value="companion">Companion</option>
-                    <option value="leipzig">Leipzig</option>
-                    <option value="kosal">Kosal</option>
-                </select>
-            </div>
-            
-            <div class="move-method">
-                <p>Piece Movement Style:</p>
-                <div>
-                    <input type="radio" id="dragAndDrop" name="moveMethod" value="drag" checked>
-                    <label for="dragAndDrop">Drag and Drop</label>
-                </div>
-                <div>
-                    <input type="radio" id="clickToSelect" name="moveMethod" value="click">
-                    <label for="clickToSelect">Click to Select/Move</label>
-                </div>
-                <div>
-                    <input type="radio" id="algebraicNotation" name="moveMethod" value="algebraic">
-                    <label for="algebraicNotation">Algebraic Notation</label>
-                </div>
-            </div>
-            
-            <div class="buttons">
-                <button id="startBtn">Start Position</button>
-                <button id="playOpening">Play Opening</button>
-                <button id="flipBoard">Flip Board</button>
-                <button id="clearArrowsBtn">Clear Arrows</button>
-            </div>
-            
-            <div class="info">
-                <p>You can move the pieces! Try exploring some opening moves.</p>
-                <p>Right-click and drag to draw arrows on the board</p>
-            </div>
-        </div>
+  <header>
+    <h1>Master essential chess openings using classical principles from public domain resources</h1>
+  </header>
+
+  <div class="container">
+    <!-- Chessboard container -->
+    <div id="chessboard" class="board-container"></div>
+    <div class="controls">
+      <div><p class="eval-display" id="evaluation">0.0</p></div>
+      <div class="piece-style">
+        <label for="pieceStyle">Choose piece style:</label>
+        <select id="pieceStyle">
+          <option value="USCF">USCF</option>
+          <option value="alpha">Alpha</option>
+          <option value="cburnett">Cburnett</option>
+          <option value="chess7">Chess7</option>
+          <option value="chessnut">Chessnut</option>
+          <option value="companion">Companion</option>
+          <option value="leipzig">Leipzig</option>
+          <option value="kosal">Kosal</option>
+        </select>
+      </div>
+      <div class="move-method">
+        <p>Piece Movement Style:</p>
+        <label><input type="radio" name="moveMethod" value="drag" checked> Drag and Drop</label>
+        <label><input type="radio" name="moveMethod" value="click"> Click to Select/Move</label>
+        <label><input type="radio" name="moveMethod" value="algebraic"> Algebraic Notation</label>
+      </div>
+      <div class="buttons">
+        <button id="startBtn">Start Position</button>
+        <button id="playOpening">Play Opening</button>
+        <button id="flipBoard">Flip Board</button>
+        <button id="clearArrowsBtn">Clear Arrows</button>
+      </div>
+      <div class="info">
+        <p>You can move the pieces! Try exploring some opening moves.</p>
+        <p>Right-click and drag to draw arrows on the board</p>
+      </div>
     </div>
-    
-    <div class="learn-section">
-        <button id="startLearning">Start Learning</button>
-    </div>
-    
-    <!-- JavaScript files -->
-    <!-- jQuery is required by chessboard.js -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Load chess libraries from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
-    
-    <!-- Load Stockfish from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/stockfish@11.0.0/stockfish.js"></script>
-    
-    <!-- Load custom application files -->
-    <script src="js/chess-engine.js"></script>
-    <script src="js/board-features.js"></script>
-    
-    <!-- Load main.js last -->
-    <script src="js/main.js"></script>
+  </div>
+
+  <div class="learn-section">
+    <button id="startLearning">Start Learning</button>
+  </div>
+
+  <!-- JS dependencies -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="assets/js/chess.js"></script>
+  <script src="assets/js/chessboard-1.0.0.min.js"></script>
+  <script src="assets/js/stockfish.js"></script>
+
+  <!-- Custom modules -->
+  <script src="assets/js/engine-loader.js"></script>
+  <script src="assets/js/chess-engine.js"></script>
+  <script src="assets/js/board-features.js"></script>
+  <script src="assets/js/game-analyzer.js"></script>
+  <script src="assets/js/move-explainer.js"></script>
+  <script src="assets/js/opening-book.js"></script>
+  <script src="assets/js/database.js"></script>
+  <script src="assets/js/learn.js"></script>
+  <script src="assets/js/practice.js"></script>
+
+  <!-- Main application logic -->
+  <script src="assets/js/main.js"></script>
 </body>
 </html>
+```
