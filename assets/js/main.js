@@ -115,12 +115,12 @@
     ChessApp.board.position(ChessApp.game.fen());
     ChessApp.features.clearAll();
 
-    ChessApp.engine.makeMove(move.san)
+    /*ChessApp.engine.makeMove(move.san)
       .then(resp => {
         ChessApp.game.move(resp.bestMove);
         ChessApp.board.position(ChessApp.game.fen());
       })
-      .catch(console.error);
+      .catch(console.error);*/
   }
 
   /**
