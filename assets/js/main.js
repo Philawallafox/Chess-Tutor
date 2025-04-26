@@ -1,5 +1,3 @@
-## assets/js/main.js
-```javascript
 // Main JS for Chess Tutor with JSDoc annotations for IDE support
 
 /**
@@ -154,4 +152,3 @@
   }
 
 })();
-```
