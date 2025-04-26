@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practice Chess Openings - Chess Tutor</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
 </head>
 <body>
     <header>
@@ -20,29 +21,144 @@
     </header>
 
     <main>
-        <section class="placeholder">
-            <h2>Practice Module Coming Soon!</h2>
-            <p>Our interactive practice module is currently in development.</p>
+        <section class="practice-section">
+            <h2>Practice Openings</h2>
             
-            <div class="features-preview">
-                <h3>Future features:</h3>
-                <ul>
-                    <li>Test your knowledge of opening sequences</li>
-                    <li>Challenge yourself with variations</li>
-                    <li>Track your progress and mastery</li>
-                    <li>Receive helpful feedback on your moves</li>
-                    <li>Spaced repetition to reinforce learning</li>
-                </ul>
+            <div class="practice-container">
+                <div class="left-panel">
+                    <div class="computer-settings">
+                        <h3>Computer Opponent</h3>
+                        
+                        <div class="setting-group">
+                            <label>Play as:</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="play-color" value="w" checked> White
+                                </label>
+                                <label>
+                                    <input type="radio" name="play-color" value="b"> Black
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="opponent-strength">Opponent Strength:</label>
+                            <select id="opponent-strength">
+                                <option value="1000">Beginner (≈1000 ELO)</option>
+                                <option value="1300">Casual Player (≈1300 ELO)</option>
+                                <option value="1500" selected>Club Player (≈1500 ELO)</option>
+                                <option value="1800">Strong Club Player (≈1800 ELO)</option>
+                                <option value="2000">Expert (≈2000 ELO)</option>
+                                <option value="2200">Master (≈2200 ELO)</option>
+                                <option value="2500">Grandmaster (≈2500 ELO)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="practice-opening">Force Opening:</label>
+                            <select id="practice-opening">
+                                <option value="">Random Play</option>
+                                <!-- Openings will be populated here -->
+                            </select>
+                        </div>
+                        
+                        <button id="start-game" class="btn">Start New Game</button>
+                    </div>
+                    
+                    <div class="game-status">
+                        <h3>Game Status</h3>
+                        <div id="status-text">Ready to play</div>
+                        <div id="move-history" class="move-history">
+                            <!-- Move history will appear here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="center-panel">
+                    <div class="board-container">
+                        <div id="practice-board"></div>
+                        <div id="evaluation-bar">
+                            <div class="eval-bar-inner"></div>
+                            <div class="eval-score">0.0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-controls">
+                        <button id="resign-game">Resign</button>
+                        <button id="flip-board">Flip Board</button>
+                        <button id="analyze-game" disabled>Analyze Game</button>
+                    </div>
+                </div>
+                
+                <div class="right-panel">
+                    <div class="current-position">
+                        <h3>Position Analysis</h3>
+                        <div id="position-evaluation">
+                            Make a move to see the evaluation.
+                        </div>
+                    </div>
+                    
+                    <div class="move-suggestion">
+                        <h3>Engine Suggestion</h3>
+                        <div id="suggested-move">
+                            <div class="best-move">Best move: <span id="best-move">-</span></div>
+                            <button id="explain-move" disabled>Ask Why</button>
+                        </div>
+                        <div id="move-explanation" class="explanation-panel"></div>
+                    </div>
+                </div>
             </div>
-            
-            <p>We're working hard to bring you a comprehensive practice environment that will help you master chess openings.</p>
-            
-            <a href="index.html" class="btn">Return to Home</a>
         </section>
+        
+        <!-- Game Analysis Modal (hidden by default) -->
+        <div id="analysis-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2>Game Analysis</h2>
+                
+                <div class="analysis-container">
+                    <div class="analysis-board-container">
+                        <div id="analysis-board"></div>
+                    </div>
+                    
+                    <div class="analysis-controls">
+                        <button id="analysis-prev">Previous</button>
+                        <button id="analysis-next">Next</button>
+                    </div>
+                    
+                    <div class="analysis-info">
+                        <h3>Position Assessment</h3>
+                        <div id="analysis-text"></div>
+                    </div>
+                    
+                    <div class="analysis-summary">
+                        <h3>Game Summary</h3>
+                        <div id="analysis-summary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer>
         <p>&copy; 2025 Chess Tutor | <a href="acknowledgments.html">Acknowledgments</a></p>
     </footer>
+
+    <!-- Load libraries in the correct order -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    
+    <!-- Stockfish engine -->
+    <script src="assets/js/stockfish.js"></script>
+    
+    <!-- Our application scripts -->
+    <script src="assets/js/database.js"></script>
+    <script src="assets/js/chess-engine.js"></script>
+    <script src="assets/js/move-explainer.js"></script>
+    <script src="assets/js/board-features.js"></script>
+    <script src="assets/js/opening-book.js"></script>
+    <script src="assets/js/game-analyzer.js"></script>
+    <script src="assets/js/practice.js"></script>
 </body>
 </html>

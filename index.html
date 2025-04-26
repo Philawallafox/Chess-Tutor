@@ -6,32 +6,6 @@
     <title>Chess Tutor</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
-    <style>
-        .board-controls {
-            margin: 15px auto;
-            text-align: center;
-        }
-        
-        .board-controls button {
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 8px 12px;
-            margin: 0 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .board-controls button:hover {
-            background-color: #e0e0e0;
-        }
-        
-        .instructions {
-            margin: 15px auto;
-            font-style: italic;
-            color: #666;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -51,7 +25,13 @@
             <h2>Learn Chess Openings for Free</h2>
             <p>Master essential chess openings using classical principles from public domain resources.</p>
             
-            <div id="demo-board" style="width: 350px; margin: 0 auto;"></div>
+            <div class="board-container">
+                <div id="demo-board"></div>
+                <div id="evaluation-bar">
+                    <div class="eval-bar-inner"></div>
+                    <div class="eval-score">0.0</div>
+                </div>
+            </div>
             
             <div class="theme-selector">
                 <label for="piece-theme">Choose piece style:</label>
@@ -93,225 +73,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     
-    <!-- Load our scripts in the correct order -->
-    <script src="assets/js/database.js"></script>
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/board-features.js"></script>
+    <!-- Stockfish engine -->
+    <script src="assets/js/stockfish.js"></script>
     
-    <!-- Fallback initialization script in case main.js has issues -->
-    <script>
-    // This script ensures the board loads even if there are issues with the main.js file
-    document.addEventListener('DOMContentLoaded', function() {
-        // Only initialize if the main.js didn't already do it
-        if (!window.boardInitialized) {
-            // Check if we're on a page with a chessboard
-            const boardElement = document.getElementById('demo-board');
-            if (!boardElement) return;
-            
-            console.log('Fallback initialization running');
-            
-            // Global variables
-            let board = null;
-            let game = null;
-            let currentTheme = 'wikipedia';
-            
-            // Try to load saved theme
-            const savedTheme = localStorage.getItem('chessTheme');
-            if (savedTheme) {
-                currentTheme = savedTheme;
-                const themeSelector = document.getElementById('piece-theme');
-                if (themeSelector && [...themeSelector.options].some(opt => opt.value === savedTheme)) {
-                    themeSelector.value = savedTheme;
-                }
-            }
-            
-            // Initialize chess game
-            game = new Chess();
-            
-            // Check for legal moves
-            function onDragStart(source, piece, position, orientation) {
-                // Don't allow moving pieces if the game is over
-                if (game.game_over()) return false;
-                
-                // Only allow moving pieces of the current turn
-                if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-                    (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-                    return false;
-                }
-                
-                return true;
-            }
-            
-            // Update the board after a move
-            function onDrop(source, target) {
-                // Check if the move is legal
-                const move = game.move({
-                    from: source,
-                    to: target,
-                    promotion: 'q' // Always promote to queen for simplicity
-                });
-                
-                // If illegal move, snap back
-                if (move === null) return 'snapback';
-                
-                // Update the board with the new position
-                board.position(game.fen());
-            }
-            
-            // Initialize the board
-            try {
-                board = Chessboard('demo-board', {
-                    position: 'start',
-                    pieceTheme: 'https://chessboardjs.com/img/chesspieces/' + currentTheme + '/{piece}.png',
-                    draggable: true,
-                    onDragStart: onDragStart,
-                    onDrop: onDrop
-                });
-                
-                console.log('Board initialized successfully by fallback script');
-                
-                // Handle theme changes
-                const themeSelector = document.getElementById('piece-theme');
-                if (themeSelector) {
-                    themeSelector.addEventListener('change', function(e) {
-                        // Update theme
-                        currentTheme = e.target.value;
-                        localStorage.setItem('chessTheme', currentTheme);
-                        
-                        // Save current position
-                        const currentPosition = board.position();
-                        
-                        // Recreate board with new theme
-                        board.destroy();
-                        board = Chessboard('demo-board', {
-                            position: currentPosition,
-                            pieceTheme: 'https://chessboardjs.com/img/chesspieces/' + currentTheme + '/{piece}.png',
-                            draggable: true,
-                            onDragStart: onDragStart,
-                            onDrop: onDrop
-                        });
-                    });
-                }
-                
-                // Add button event listeners
-                const startPositionBtn = document.getElementById('start-position');
-                const flipBoardBtn = document.getElementById('flip-board');
-                const playOpeningBtn = document.getElementById('play-opening');
-                
-                if (startPositionBtn) {
-                    startPositionBtn.addEventListener('click', function() {
-                        game.reset();
-                        board.start();
-                    });
-                }
-                
-                if (flipBoardBtn) {
-                    flipBoardBtn.addEventListener('click', function() {
-                        board.flip();
-                    });
-                }
-                
-                if (playOpeningBtn) {
-                    playOpeningBtn.addEventListener('click', function() {
-                        // Reset board
-                        game.reset();
-                        board.start();
-                        
-                        // Play Ruy Lopez opening
-                        const moves = ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'];
-                        let moveIndex = 0;
-                        
-                        function makeNextMove() {
-                            if (moveIndex < moves.length) {
-                                game.move(moves[moveIndex]);
-                                board.position(game.fen());
-                                moveIndex++;
-                                setTimeout(makeNextMove, 1000);
-                            }
-                        }
-                        
-                        setTimeout(makeNextMove, 500);
-                    });
-                }
-                
-                // Try to load and display openings if database.js is loaded
-                const openingsListElement = document.getElementById('openings-list');
-                if (openingsListElement && typeof loadOpeningsDatabase === 'function') {
-                    loadOpeningsDatabase().then(openings => {
-                        if (!openings || openings.length === 0) {
-                            openingsListElement.innerHTML = '<div class="error">No openings found.</div>';
-                            return;
-                        }
-                        
-                        // Clear loading message
-                        openingsListElement.innerHTML = '';
-                        
-                        // Create a card for each opening
-                        openings.forEach(opening => {
-                            const card = document.createElement('div');
-                            card.className = 'opening-card';
-                            card.innerHTML = `
-                                <h3>${opening.name}</h3>
-                                <span class="difficulty ${opening.difficulty}">${opening.difficulty}</span>
-                                <p>Popularity: ${opening.popularity}</p>
-                                <button class="btn-small" data-opening="${opening.id}">Explore</button>
-                            `;
-                            
-                            // Add to the grid
-                            openingsListElement.appendChild(card);
-                            
-                            // Add click handler
-                            const exploreButton = card.querySelector(`button[data-opening="${opening.id}"]`);
-                            exploreButton.addEventListener('click', () => {
-                                // Reset board
-                                game.reset();
-                                board.start();
-                                
-                                // Get the opening main line
-                                getOpeningMainLine(opening.id).then(mainLine => {
-                                    if (!mainLine || mainLine.length === 0) {
-                                        console.error('No main line found for opening:', opening.id);
-                                        return;
-                                    }
-                                    
-                                    // Extract just the moves
-                                    const moves = mainLine.map(moveInfo => moveInfo.move);
-                                    let moveIndex = 0;
-                                    
-                                    // Function to make the next move
-                                    function makeNextMove() {
-                                        if (moveIndex < moves.length) {
-                                            game.move(moves[moveIndex]);
-                                            board.position(game.fen());
-                                            moveIndex++;
-                                            setTimeout(makeNextMove, 1000);
-                                        }
-                                    }
-                                    
-                                    // Start the sequence
-                                    setTimeout(makeNextMove, 500);
-                                }).catch(error => {
-                                    console.error('Error loading opening main line:', error);
-                                });
-                            });
-                        });
-                    }).catch(error => {
-                        console.error('Error loading openings:', error);
-                        openingsListElement.innerHTML = '<div class="error">Could not load openings. Please try again later.</div>';
-                    });
-                }
-                
-                // Initialize board features if available
-                if (typeof initBoardFeatures === 'function') {
-                    initBoardFeatures(board, game);
-                }
-                
-            } catch (error) {
-                console.error('Error initializing chessboard:', error);
-                alert('There was an error loading the chessboard. Please check the console for details.');
-            }
-        }
-    });
-    </script>
+    <!-- Our application scripts -->
+    <script src="assets/js/database.js"></script>
+    <script src="assets/js/chess-engine.js"></script>
+    <script src="assets/js/move-explainer.js"></script>
+    <script src="assets/js/board-features.js"></script>
+    <script src="assets/js/main.js"></script>
 </body>
 </html>

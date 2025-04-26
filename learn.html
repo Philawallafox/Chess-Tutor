@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Chess Openings - Chess Tutor</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
 </head>
 <body>
     <header>
@@ -20,28 +21,79 @@
     </header>
 
     <main>
-        <section class="placeholder">
-            <h2>Learning Module Coming Soon!</h2>
-            <p>We're currently developing our interactive learning module based on public domain chess resources.</p>
+        <section class="learn-section">
+            <h2>Learning Module</h2>
             
-            <div class="features-preview">
-                <h3>What to expect:</h3>
-                <ul>
-                    <li>Step-by-step opening walkthroughs</li>
-                    <li>Interactive lessons with feedback</li>
-                    <li>Classic openings from masters like Steinitz and Lasker</li>
-                    <li>Historical context and strategic principles</li>
-                </ul>
+            <div class="learn-container">
+                <div class="left-panel">
+                    <div class="opening-selector">
+                        <h3>Select an Opening</h3>
+                        <select id="opening-select">
+                            <option value="">-- Choose an opening --</option>
+                            <!-- Openings will be populated here -->
+                        </select>
+                    </div>
+                    
+                    <div class="opening-info">
+                        <h3 id="opening-name">Opening Information</h3>
+                        <div id="opening-description">
+                            Select an opening to begin learning.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="center-panel">
+                    <div class="board-container">
+                        <div id="learn-board"></div>
+                        <div id="evaluation-bar">
+                            <div class="eval-bar-inner"></div>
+                            <div class="eval-score">0.0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="move-navigation">
+                        <button id="prev-move" disabled>Previous Move</button>
+                        <span id="current-move">0/0</span>
+                        <button id="next-move" disabled>Next Move</button>
+                    </div>
+                </div>
+                
+                <div class="right-panel">
+                    <div class="move-explanation">
+                        <h3>Move Explanation</h3>
+                        <div id="move-text">Select an opening to see move explanations.</div>
+                    </div>
+                    
+                    <div class="engine-analysis">
+                        <h3>Engine Analysis</h3>
+                        <div id="engine-recommendation">
+                            <div class="best-move">Best move: <span id="best-move">-</span></div>
+                            <button id="explain-move" disabled>Ask Why</button>
+                        </div>
+                        <div id="move-explanation" class="explanation-panel"></div>
+                    </div>
+                </div>
             </div>
-            
-            <p>Check back soon for updates or follow our GitHub repository for development progress.</p>
-            
-            <a href="index.html" class="btn">Return to Home</a>
         </section>
     </main>
 
     <footer>
         <p>&copy; 2025 Chess Tutor | <a href="acknowledgments.html">Acknowledgments</a></p>
     </footer>
+
+    <!-- Load libraries in the correct order -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    
+    <!-- Stockfish engine -->
+    <script src="assets/js/stockfish.js"></script>
+    
+    <!-- Our application scripts -->
+    <script src="assets/js/database.js"></script>
+    <script src="assets/js/chess-engine.js"></script>
+    <script src="assets/js/move-explainer.js"></script>
+    <script src="assets/js/board-features.js"></script>
+    <script src="assets/js/learn.js"></script>
 </body>
 </html>
