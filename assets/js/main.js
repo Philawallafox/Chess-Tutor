@@ -1,283 +1,223 @@
-/**
- * Chess Tutor - Main JavaScript
- * 
- * This file manages the interactive chessboard and user interface elements.
- * It integrates with the database.js module to load opening data.
- */
+// Updated board initialization code
+// Add this to your main.js or wherever you initialize the board
 
-// Global variables to maintain state
-let board = null;
-let game = null;
-let currentTheme = 'wikipedia';
-let boardInitialized = false;
-
-// Initialize the board with the current theme
-function initializeBoard() {
-    // Create a new chess game instance
-    game = new Chess();
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize chessboard
+    const config = {
+      position: 'start',
+      draggable: true,
+      onDragStart: onDragStart,
+      onDrop: onDrop,
+      onSnapEnd: onSnapEnd
+    };
     
-    // Check for legal moves (for making the board interactive)
-    function onDragStart(source, piece, position, orientation) {
-        // Don't allow moving pieces if the game is over
-        if (game.game_over()) return false;
+    const board = Chessboard('chessboard', config);
+    
+    // Initialize chess.js
+    const game = new Chess();
+    
+    // Store board and game in window for access from other scripts
+    window.chessBoard = board;
+    window.chessGame = game;
+    
+    // Initialize board features AFTER board is fully rendered
+    setTimeout(() => {
+      window.boardFeatures = new BoardFeatures(board, {
+        arrowColor: 'rgba(255, 0, 0, 0.6)',
+        arrowWidth: 8,
+        highlightColor: 'rgba(255, 255, 0, 0.5)'
+      });
+      
+      // Set up buttons
+      document.getElementById('startBtn').addEventListener('click', () => {
+        board.position('start');
+        game.reset();
+        boardFeatures.clearAll();
+      });
+      
+      document.getElementById('clearArrowsBtn').addEventListener('click', () => {
+        boardFeatures.clearArrows();
+      });
+    }, 500);
+    
+    // Listen for move input mode changes
+    document.querySelectorAll('input[name="moveMethod"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const moveMethod = e.target.value;
         
-        // Only allow moving pieces of the current turn
-        if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-            (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-            return false;
+        if (moveMethod === 'drag') {
+          board.draggable = true;
+        } else if (moveMethod === 'click') {
+          board.draggable = false;
+          // Set up click-to-move
+          setupClickToMove();
+        } else if (moveMethod === 'algebraic') {
+          board.draggable = false;
+          // Set up algebraic notation input
+          setupAlgebraicInput();
         }
-        
-        return true;
-    }
-    
-    // Update the board after a move
-    function onDrop(source, target) {
-        // Check if the move is legal
-        const move = game.move({
-            from: source,
-            to: target,
-            promotion: 'q' // Always promote to queen for simplicity
-        });
-        
-        // If illegal move, snap back
-        if (move === null) return 'snapback';
-        
-        // Update the board with the new position
-        board.position(game.fen());
-    }
-    
-    // Create the board with the current theme
-    board = Chessboard('demo-board', {
-        position: 'start',
-        pieceTheme: 'https://chessboardjs.com/img/chesspieces/' + currentTheme + '/{piece}.png',
-        draggable: true,
-        onDragStart: onDragStart,
-        onDrop: onDrop
+      });
     });
     
-    // Set global flag to indicate board is initialized
-    window.board = board;
-    window.game = game;
-    window.currentTheme = currentTheme;
-    window.boardInitialized = true;
-    
-    // Initialize advanced board features if the function exists
-    if (typeof initBoardFeatures === 'function') {
-        initBoardFeatures(board, game);
-    }
-    
-    // If we're on the homepage with the demo board, animate some moves
-    if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
-        // Add event listeners to control buttons if they exist
-        setupBoardControls();
-    }
-}
-
-// Set up the board control buttons
-function setupBoardControls() {
-    const startPositionBtn = document.getElementById('start-position');
-    const flipBoardBtn = document.getElementById('flip-board');
-    const playOpeningBtn = document.getElementById('play-opening');
-    
-    if (startPositionBtn) {
-        startPositionBtn.addEventListener('click', function() {
-            game.reset();
-            board.start();
-        });
-    }
-    
-    if (flipBoardBtn) {
-        flipBoardBtn.addEventListener('click', function() {
-            board.flip();
-        });
-    }
-    
-    if (playOpeningBtn) {
-        playOpeningBtn.addEventListener('click', function() {
-            demonstrateSpecificOpening('ruy_lopez');
-        });
-    }
-}
-
-// Demonstrate a specific opening
-function demonstrateSpecificOpening(openingId) {
-    // Reset board to starting position
-    game.reset();
-    board.start();
-    
-    // Get the opening main line moves
-    if (typeof getOpeningMainLine === 'function') {
-        getOpeningMainLine(openingId).then(mainLine => {
-            if (!mainLine || mainLine.length === 0) {
-                console.error('No main line found for opening:', openingId);
-                return;
-            }
-            
-            // Extract just the moves
-            const moves = mainLine.map(moveInfo => moveInfo.move);
-            let moveIndex = 0;
-            
-            // Function to make the next move in the sequence
-            function makeNextMove() {
-                if (moveIndex < moves.length) {
-                    // Make the move
-                    game.move(moves[moveIndex]);
-                    
-                    // Update the board
-                    board.position(game.fen());
-                    
-                    // Increment move index
-                    moveIndex++;
-                    
-                    // Schedule the next move
-                    setTimeout(makeNextMove, 1000);
-                }
-            }
-            
-            // Start the sequence after a short delay
-            setTimeout(makeNextMove, 500);
-        }).catch(error => {
-            console.error('Error loading opening main line:', error);
-        });
-    } else {
-        console.error('getOpeningMainLine function not available');
-    }
-}
-
-// Change the theme of the chessboard
-function changeTheme(themeName) {
-    // Update the current theme
-    currentTheme = themeName;
-    window.currentTheme = themeName;
-    
-    // Store the current position
-    const currentPosition = board.position();
-    
-    // Destroy the old board
-    board.destroy();
-    
-    // Create a new board with the new theme and same position
-    board = Chessboard('demo-board', {
-        position: currentPosition,
-        pieceTheme: 'https://chessboardjs.com/img/chesspieces/' + currentTheme + '/{piece}.png',
-        draggable: true,
-        onDragStart: function(source, piece) {
-            // Don't allow moving pieces if the game is over
-            if (game.game_over()) return false;
-            
-            // Only allow moving pieces of the current turn
-            if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-                (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-                return false;
-            }
-            
-            return true;
-        },
-        onDrop: function(source, target) {
-            // Check if the move is legal
-            const move = game.move({
-                from: source,
-                to: target,
-                promotion: 'q' // Always promote to queen for simplicity
-            });
-            
-            // If illegal move, snap back
-            if (move === null) return 'snapback';
-            
-            // Update the board with the new position
+    // Set up click-to-move handler
+    function setupClickToMove() {
+      let selectedSquare = null;
+      
+      document.querySelector('.board-b72b1').addEventListener('click', (e) => {
+        const square = getBoardSquareFromEvent(e);
+        if (!square) return;
+        
+        if (!selectedSquare) {
+          // First click - select piece
+          if (game.get(square)) {
+            selectedSquare = square;
+            boardFeatures.highlightSquare(square);
+          }
+        } else {
+          // Second click - attempt move
+          const move = game.move({
+            from: selectedSquare,
+            to: square,
+            promotion: 'q' // Auto-promote to queen for simplicity
+          });
+          
+          if (move) {
+            // Valid move
             board.position(game.fen());
-        }
-    });
-    
-    // Update the global board reference
-    window.board = board;
-    
-    // Reinitialize board features if available
-    if (typeof initBoardFeatures === 'function') {
-        initBoardFeatures(board, game);
-    }
-    
-    // Save preference to localStorage for next visit
-    localStorage.setItem('chessTheme', themeName);
-}
-
-// Display openings in the UI
-function showOpenings(openings) {
-    const openingsListElement = document.getElementById('openings-list');
-    if (!openingsListElement) return;
-    
-    if (!openings || openings.length === 0) {
-        openingsListElement.innerHTML = '<div class="error">No openings found.</div>';
-        return;
-    }
-    
-    // Clear loading message
-    openingsListElement.innerHTML = '';
-    
-    // Create a card for each opening
-    openings.forEach(opening => {
-        const card = document.createElement('div');
-        card.className = 'opening-card';
-        card.innerHTML = `
-            <h3>${opening.name}</h3>
-            <span class="difficulty ${opening.difficulty}">${opening.difficulty}</span>
-            <p>Popularity: ${opening.popularity}</p>
-            <button class="btn-small" data-opening="${opening.id}">Explore</button>
-        `;
-        
-        // Add to the grid
-        openingsListElement.appendChild(card);
-        
-        // Add click handler to the button
-        const exploreButton = card.querySelector(`button[data-opening="${opening.id}"]`);
-        exploreButton.addEventListener('click', () => {
-            // Demonstrate the opening on the board
-            demonstrateSpecificOpening(opening.id);
-        });
-    });
-}
-
-// Initialize everything when the DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on a page with a chessboard
-    const boardElement = document.getElementById('demo-board');
-    if (!boardElement) return;
-    
-    // Check if user has a saved theme preference
-    const savedTheme = localStorage.getItem('chessTheme');
-    if (savedTheme) {
-        currentTheme = savedTheme;
-        
-        // Update the theme selector dropdown if it exists
-        const themeSelector = document.getElementById('piece-theme');
-        if (themeSelector) {
-            // Only set the value if this option exists in the dropdown
-            if ([...themeSelector.options].some(opt => opt.value === savedTheme)) {
-                themeSelector.value = savedTheme;
+            boardFeatures.clearHighlights();
+          } else {
+            // Invalid move, check if clicked on another piece
+            if (game.get(square)) {
+              boardFeatures.clearHighlights();
+              selectedSquare = square;
+              boardFeatures.highlightSquare(square);
             }
+          }
+          
+          if (move || !game.get(square)) {
+            selectedSquare = null;
+          }
         }
+      });
     }
     
-    // Initialize the board with the selected theme
-    initializeBoard();
-    
-    // Add event listener to the theme selector if it exists
-    const themeSelector = document.getElementById('piece-theme');
-    if (themeSelector) {
-        themeSelector.addEventListener('change', function(e) {
-            changeTheme(e.target.value);
+    // Set up algebraic notation input
+    function setupAlgebraicInput() {
+      // Create input field if it doesn't exist
+      let inputField = document.getElementById('algebraicInput');
+      if (!inputField) {
+        inputField = document.createElement('input');
+        inputField.id = 'algebraicInput';
+        inputField.type = 'text';
+        inputField.placeholder = 'Enter move (e.g., e4, Nf3)';
+        inputField.style.width = '200px';
+        inputField.style.marginTop = '10px';
+        
+        const inputButton = document.createElement('button');
+        inputButton.textContent = 'Move';
+        inputButton.style.marginLeft = '5px';
+        
+        const inputContainer = document.createElement('div');
+        inputContainer.appendChild(inputField);
+        inputContainer.appendChild(inputButton);
+        
+        document.querySelector('.board-container').appendChild(inputContainer);
+        
+        // Set up event handler
+        inputButton.addEventListener('click', () => {
+          const moveText = inputField.value.trim();
+          const move = game.move(moveText);
+          
+          if (move) {
+            board.position(game.fen());
+            inputField.value = '';
+          } else {
+            alert('Invalid move! Please try again.');
+          }
         });
+        
+        // Also allow Enter key
+        inputField.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            const moveText = inputField.value.trim();
+            const move = game.move(moveText);
+            
+            if (move) {
+              board.position(game.fen());
+              inputField.value = '';
+            } else {
+              alert('Invalid move! Please try again.');
+            }
+          }
+        });
+      }
     }
     
-    // Load and display the openings
-    const openingsListElement = document.getElementById('openings-list');
-    if (openingsListElement) {
-        // Load openings database and display them
-        loadOpeningsDatabase().then(openings => {
-            showOpenings(openings);
-        }).catch(error => {
-            console.error('Error loading openings:', error);
-            openingsListElement.innerHTML = '<div class="error">Could not load openings. Please try again later.</div>';
-        });
+    // Helper function to get board square from mouse event
+    function getBoardSquareFromEvent(event) {
+      const boardElement = document.querySelector('.board-b72b1');
+      const rect = boardElement.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      
+      // Calculate square size
+      const squareSize = rect.width / 8;
+      
+      // Convert coordinates to square (0-7 for both file and rank)
+      let file = Math.floor(x / squareSize);
+      let rank = Math.floor(y / squareSize);
+      
+      // Adjust for board orientation (if black is on bottom)
+      if (!board.orientation().startsWith('w')) {
+        file = 7 - file;
+        rank = 7 - rank;
+      }
+      
+      // Convert to algebraic notation
+      const files = 'abcdefgh';
+      const ranks = '87654321';
+      
+      return files.charAt(file) + ranks.charAt(rank);
     }
-});
+    
+    // Drag and drop handlers
+    function onDragStart(source, piece) {
+      // Only allow the player whose turn it is to move pieces
+      if (game.game_over() || 
+          (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+        return false;
+      }
+    }
+    
+    function onDrop(source, target) {
+      // Try to make the move
+      const move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q' // Auto-promote to queen for simplicity
+      });
+      
+      // If illegal move, snap piece back to source square
+      if (move === null) return 'snapback';
+    }
+    
+    function onSnapEnd() {
+      // Update board position after piece snap animation
+      board.position(game.fen());
+    }
+    
+    // Adjust board size on window resize
+    window.addEventListener('resize', () => {
+      board.resize();
+      
+      // Need to redraw features after resize
+      if (window.boardFeatures) {
+        setTimeout(() => {
+          window.boardFeatures.resizeCanvas();
+          window.boardFeatures.render();
+        }, 100);
+      }
+    });
+  });

@@ -1,261 +1,314 @@
-/**
- * Chess Tutor - Stockfish Engine Interface
- * 
- * This file provides an interface to interact with the Stockfish chess engine.
- * It supports analyzing positions, making moves, and adjusting engine strength.
- */
+// board-features.js - Fixed version for highlighting and arrows
 
-class ChessEngine {
-    constructor(instanceName = 'default') {
-      this.instanceName = instanceName;
-      this.engine = null;
-      this.isReady = false;
-      this.onReady = null;
-      this.onAnalysis = null;
-      this.onMove = null;
-    }
-  
-    initialize(callback) {
-      // Initialize the engine
-      try {
-        this.engine = typeof Stockfish === 'function' ? Stockfish() : new Worker('assets/js/stockfish.js');
-        
-        // Set up message handling
-        this.engine.onmessage = (event) => {
-          const message = event.data;
-          
-          // Log engine output (for debugging)
-          console.log(`${this.instanceName} Engine: ${message}`);
-          
-          // Handle "bestmove" messages for move generation
-          if (message.startsWith('bestmove')) {
-            const moveMatch = message.match(/bestmove\s+(\w+)/);
-            if (moveMatch && this.onMove) {
-              this.onMove(moveMatch[1]);
-            }
-          }
-          
-          // Handle analysis info for position evaluation
-          else if (message.startsWith('info') && message.includes('score')) {
-            const infoData = this.parseInfo(message);
-            if (this.onAnalysis && infoData.score !== undefined) {
-              this.onAnalysis(infoData);
-            }
-          }
-          
-          // Handle readyok message for initialization
-          else if (message.includes('readyok')) {
-            this.isReady = true;
-            if (this.onReady) {
-              this.onReady();
-            }
-            if (callback) {
-              callback();
-            }
-          }
-        };
-        
-        // Initialize the engine with standard settings
-        this.sendCommand('uci');
-        this.sendCommand('setoption name Hash value 32');
-        this.sendCommand('setoption name Threads value 4');
-        this.sendCommand('isready');
-      } catch (error) {
-        console.error(`Error initializing ${this.instanceName} engine:`, error);
-        alert('Could not initialize chess engine. Please check your browser compatibility.');
-      }
+class BoardFeatures {
+    constructor(board, options = {}) {
+      this.board = board;
+      this.options = Object.assign({
+        arrowColor: 'rgba(255, 0, 0, 0.5)',
+        arrowWidth: 8,
+        highlightColor: 'rgba(255, 255, 0, 0.5)',
+        suggestMoveColor: 'rgba(0, 255, 0, 0.4)'
+      }, options);
+      
+      this.highlights = [];
+      this.arrows = [];
+      this.canvas = this.createCanvas();
+      this.isDragging = false;
+      this.dragStart = null;
+      this.dragEnd = null;
+      
+      this.initEvents();
+      this.render();
     }
     
-    // Send a command to the engine
-    sendCommand(command) {
-      if (!this.engine) {
-        console.error(`${this.instanceName} engine not initialized`);
-        return;
+    createCanvas() {
+      // Create canvas element that overlays the board
+      const boardElement = this.board.container.querySelector('.board-b72b1');
+      if (!boardElement) {
+        console.error('Cannot find chess board element');
+        return null;
       }
       
-      console.log(`To ${this.instanceName} Engine: ${command}`);
-      this.engine.postMessage(command);
-    }
-    
-    // Set the position for the engine to analyze
-    setPosition(fen) {
-      this.sendCommand(`position fen ${fen}`);
-    }
-    
-    // Set a position from move history
-    setPositionFromMoves(moves = []) {
-      if (moves.length === 0) {
-        this.sendCommand('position startpos');
-      } else {
-        this.sendCommand(`position startpos moves ${moves.join(' ')}`);
-      }
-    }
-    
-    // Ask the engine to find the best move
-    findBestMove(moveTime = 1000) {
-      this.sendCommand(`go movetime ${moveTime}`);
-    }
-    
-    // Analyze a position at specified depth
-    analyzePosition(depth = 18, multipv = 1) {
-      this.sendCommand(`go depth ${depth} multipv ${multipv}`);
-    }
-    
-    // Stop the current calculation
-    stopCalculation() {
-      this.sendCommand('stop');
-    }
-    
-    // Set engine strength based on ELO rating
-    setStrengthByElo(targetElo) {
-      // Map ELO ratings to approximate Stockfish skill levels
-      let skillLevel;
+      const canvas = document.createElement('canvas');
+      canvas.style.position = 'absolute';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.pointerEvents = 'none'; // Don't capture mouse events
+      canvas.width = boardElement.offsetWidth;
+      canvas.height = boardElement.offsetHeight;
       
-      if (targetElo < 1200) {
-        skillLevel = 0;
-      } else if (targetElo < 1400) {
-        skillLevel = 2;
-      } else if (targetElo < 1600) {
-        skillLevel = 5;
-      } else if (targetElo < 1800) {
-        skillLevel = 8;
-      } else if (targetElo < 2000) {
-        skillLevel = 12;
-      } else if (targetElo < 2200) {
-        skillLevel = 15;
-      } else if (targetElo < 2400) {
-        skillLevel = 18;
-      } else {
-        skillLevel = 20;
-      }
+      // Insert canvas as the first child of the board container
+      // to ensure it's behind pieces but above the board squares
+      boardElement.insertBefore(canvas, boardElement.firstChild);
       
-      // Set the skill level in Stockfish
-      this.sendCommand(`setoption name Skill Level value ${skillLevel}`);
-      
-      // Also limit search depth based on ELO
-      const maxDepth = Math.min(5 + Math.floor((targetElo - 1000) / 200), 20);
-      this.sendCommand(`setoption name Maximum Thinking Depth value ${maxDepth}`);
-      
-      return skillLevel;
+      return canvas;
     }
     
-    // Parse the info string from Stockfish for useful data
-    parseInfo(infoString) {
-      const result = {
-        depth: undefined,
-        score: undefined,
-        scoreType: 'cp',
-        pv: []
-      };
+    initEvents() {
+      // Get the board DOM element
+      const boardElement = this.board.container.querySelector('.board-b72b1');
+      if (!boardElement) return;
       
-      // Extract depth
-      const depthMatch = infoString.match(/depth (\d+)/);
-      if (depthMatch) {
-        result.depth = parseInt(depthMatch[1]);
-      }
+      // Handle right-click drag for drawing arrows
+      boardElement.addEventListener('contextmenu', (e) => {
+        e.preventDefault(); // Prevent context menu
+      });
       
-      // Extract score
-      const scoreMatch = infoString.match(/score (cp|mate) (-?\d+)/);
-      if (scoreMatch) {
-        result.scoreType = scoreMatch[1];
-        result.score = parseInt(scoreMatch[2]);
-        
-        // Convert mate score to centipawns for consistency
-        if (result.scoreType === 'mate') {
-          // Use a large value to represent mate, with sign indicating which side
-          result.score = result.score > 0 ? 
-            10000 - result.score * 10 : 
-            -10000 - result.score * 10;
+      boardElement.addEventListener('mousedown', (e) => {
+        // Only process right mouse button (button 2)
+        if (e.button === 2) {
+          e.preventDefault();
+          this.isDragging = true;
+          this.dragStart = this.getSquareFromEvent(e);
         }
-      }
+      });
       
-      // Extract principal variation (PV)
-      const pvMatch = infoString.match(/pv (.+?)(?= bmc| $| [a-z][a-z])/);
-      if (pvMatch) {
-        result.pv = pvMatch[1].trim().split(' ');
-      }
+      document.addEventListener('mousemove', (e) => {
+        if (this.isDragging) {
+          this.dragEnd = this.getSquareFromEvent(e);
+          this.render();
+        }
+      });
       
-      return result;
+      document.addEventListener('mouseup', (e) => {
+        if (this.isDragging && e.button === 2) {
+          this.isDragging = false;
+          const endSquare = this.getSquareFromEvent(e);
+          
+          if (this.dragStart && endSquare && this.dragStart !== endSquare) {
+            // Add arrow if start and end squares are different
+            this.addArrow(this.dragStart, endSquare);
+          } else if (this.dragStart && endSquare && this.dragStart === endSquare) {
+            // Toggle highlight if clicked on the same square
+            this.toggleHighlight(endSquare);
+          }
+          
+          this.dragStart = null;
+          this.dragEnd = null;
+          this.render();
+        }
+      });
+      
+      // Resize canvas when window resizes
+      window.addEventListener('resize', () => {
+        this.resizeCanvas();
+        this.render();
+      });
     }
     
-    // Convert a UCI move to SAN format
-    uciToSan(uciMove, game) {
-      const from = uciMove.substring(0, 2);
-      const to = uciMove.substring(2, 4);
-      const promotion = uciMove.length > 4 ? uciMove[4] : undefined;
+    getSquareFromEvent(e) {
+      const boardElement = this.board.container.querySelector('.board-b72b1');
+      if (!boardElement) return null;
       
-      const moveObj = {
-        from: from,
-        to: to,
-        promotion: promotion
+      const rect = boardElement.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Calculate square size
+      const squareSize = rect.width / 8;
+      
+      // Convert coordinates to square (0-7 for both file and rank)
+      let file = Math.floor(x / squareSize);
+      let rank = Math.floor(y / squareSize);
+      
+      // Adjust for board orientation (if black is on bottom)
+      if (!this.board.orientation().startsWith('w')) {
+        file = 7 - file;
+        rank = 7 - rank;
+      }
+      
+      // Convert to algebraic notation
+      const files = 'abcdefgh';
+      const ranks = '87654321';
+      
+      if (file < 0 || file > 7 || rank < 0 || rank > 7) return null;
+      
+      return files.charAt(file) + ranks.charAt(rank);
+    }
+    
+    resizeCanvas() {
+      if (!this.canvas) return;
+      
+      const boardElement = this.board.container.querySelector('.board-b72b1');
+      if (boardElement) {
+        this.canvas.width = boardElement.offsetWidth;
+        this.canvas.height = boardElement.offsetHeight;
+      }
+    }
+    
+    toggleHighlight(square) {
+      const index = this.highlights.indexOf(square);
+      if (index >= 0) {
+        this.highlights.splice(index, 1);
+      } else {
+        this.highlights.push(square);
+      }
+    }
+    
+    addArrow(from, to) {
+      // Check if arrow already exists
+      const existingIndex = this.arrows.findIndex(arrow => 
+        arrow.from === from && arrow.to === to);
+      
+      if (existingIndex >= 0) {
+        // Remove if already exists
+        this.arrows.splice(existingIndex, 1);
+      } else {
+        // Add new arrow
+        this.arrows.push({ from, to });
+      }
+    }
+    
+    clearHighlights() {
+      this.highlights = [];
+      this.render();
+    }
+    
+    clearArrows() {
+      this.arrows = [];
+      this.render();
+    }
+    
+    clearAll() {
+      this.highlights = [];
+      this.arrows = [];
+      this.render();
+    }
+    
+    highlightSquare(square) {
+      if (!this.highlights.includes(square)) {
+        this.highlights.push(square);
+        this.render();
+      }
+    }
+    
+    suggestMove(from, to) {
+      // Temporary highlight and arrow for suggesting a move
+      this.tempHighlights = [from];
+      this.tempArrow = { from, to };
+      this.render();
+      
+      // Clear after 2 seconds
+      setTimeout(() => {
+        this.tempHighlights = [];
+        this.tempArrow = null;
+        this.render();
+      }, 2000);
+    }
+    
+    render() {
+      if (!this.canvas) return;
+      
+      const ctx = this.canvas.getContext('2d');
+      const squareSize = this.canvas.width / 8;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      // Draw highlights
+      this.highlights.forEach(square => {
+        this.drawSquareHighlight(ctx, square, this.options.highlightColor, squareSize);
+      });
+      
+      // Draw temporary highlights (for move suggestions)
+      if (this.tempHighlights && this.tempHighlights.length) {
+        this.tempHighlights.forEach(square => {
+          this.drawSquareHighlight(ctx, square, this.options.suggestMoveColor, squareSize);
+        });
+      }
+      
+      // Draw arrows
+      this.arrows.forEach(arrow => {
+        this.drawArrow(ctx, arrow.from, arrow.to, this.options.arrowColor, squareSize);
+      });
+      
+      // Draw temporary arrow (for move suggestions)
+      if (this.tempArrow) {
+        this.drawArrow(ctx, this.tempArrow.from, this.tempArrow.to, 
+                       this.options.suggestMoveColor, squareSize);
+      }
+      
+      // Draw drag arrow
+      if (this.isDragging && this.dragStart && this.dragEnd && this.dragStart !== this.dragEnd) {
+        this.drawArrow(ctx, this.dragStart, this.dragEnd, this.options.arrowColor, squareSize);
+      }
+    }
+    
+    drawSquareHighlight(ctx, square, color, squareSize) {
+      const coords = this.getSquareCoordinates(square, squareSize);
+      if (!coords) return;
+      
+      ctx.fillStyle = color;
+      ctx.fillRect(coords.x, coords.y, squareSize, squareSize);
+    }
+    
+    drawArrow(ctx, from, to, color, squareSize) {
+      const fromCoords = this.getSquareCoordinates(from, squareSize);
+      const toCoords = this.getSquareCoordinates(to, squareSize);
+      
+      if (!fromCoords || !toCoords) return;
+      
+      // Calculate center points of squares
+      const fromX = fromCoords.x + squareSize / 2;
+      const fromY = fromCoords.y + squareSize / 2;
+      const toX = toCoords.x + squareSize / 2;
+      const toY = toCoords.y + squareSize / 2;
+      
+      // Draw arrow line
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(toX, toY);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = this.options.arrowWidth;
+      ctx.stroke();
+      
+      // Draw arrow head
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+      const headLength = squareSize / 3;
+      
+      ctx.beginPath();
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(
+        toX - headLength * Math.cos(angle - Math.PI / 6),
+        toY - headLength * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        toX - headLength * Math.cos(angle + Math.PI / 6),
+        toY - headLength * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.lineTo(toX, toY);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+    
+    getSquareCoordinates(square, squareSize) {
+      if (!square || square.length !== 2) return null;
+      
+      const files = 'abcdefgh';
+      const ranks = '87654321';
+      
+      const file = files.indexOf(square[0]);
+      const rank = ranks.indexOf(square[1]);
+      
+      if (file < 0 || rank < 0) return null;
+      
+      // Adjust for board orientation
+      let adjustedFile = file;
+      let adjustedRank = rank;
+      
+      if (!this.board.orientation().startsWith('w')) {
+        adjustedFile = 7 - file;
+        adjustedRank = 7 - rank;
+      }
+      
+      return {
+        x: adjustedFile * squareSize,
+        y: adjustedRank * squareSize
       };
-      
-      // Use chess.js to generate SAN
-      const move = game.move(moveObj);
-      
-      // Undo the move to restore the position
-      game.undo();
-      
-      return move ? move.san : uciMove;
-    }
-    
-    // Clean up resources when done
-    destroy() {
-      if (this.engine && this.engine.terminate) {
-        this.engine.terminate();
-      }
-      this.engine = null;
     }
   }
   
-  // Create global instances for different purposes
-  let analyzeEngine = null;  // For position analysis
-  let playEngine = null;     // For computer opponent
-  
-  // Initialize engines when page loads
-  document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize if Stockfish is available
-    if (typeof Stockfish === 'function' || typeof Worker !== 'undefined') {
-      // Create analysis engine (max strength)
-      analyzeEngine = new ChessEngine('analyzer');
-      analyzeEngine.initialize(() => {
-        console.log('Analysis engine ready');
-        
-        // Update any UI elements to show engine is ready
-        const explainButtons = document.querySelectorAll('#explain-move');
-        explainButtons.forEach(button => {
-          button.disabled = false;
-        });
-      });
-      
-      // Create play engine (adjustable strength) if on practice page
-      if (window.location.pathname.includes('practice.html')) {
-        playEngine = new ChessEngine('opponent');
-        playEngine.initialize(() => {
-          console.log('Play engine ready');
-          
-          // Set default strength
-          playEngine.setStrengthByElo(1500);
-          
-          // Enable start game button
-          const startGameButton = document.getElementById('start-game');
-          if (startGameButton) {
-            startGameButton.disabled = false;
-          }
-        });
-      }
-    } else {
-      console.warn('Stockfish not available');
-      alert('Chess engine not available in your browser. Some features may not work.');
-    }
-  });
-  
-  // Clean up engines when page unloads
-  window.addEventListener('beforeunload', function() {
-    if (analyzeEngine) {
-      analyzeEngine.destroy();
-    }
-    if (playEngine) {
-      playEngine.destroy();
-    }
-  });
+  // Export for use in modules
+  if (typeof module !== 'undefined') {
+    module.exports = BoardFeatures;
+  }
