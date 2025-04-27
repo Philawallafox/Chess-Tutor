@@ -36,16 +36,12 @@
 
   // Initialize when DOM is ready
   document.addEventListener('DOMContentLoaded', init);
-
-  /**
-   * Initialize the Chess Tutor application
-   */
-  function init() {
-    ChessApp.game = new Chess();
-
+  
+  function createBoard(position, themeName) {
     // @type {string} element ID for chessboard container
     ChessApp.board = Chessboard('chessboard', {
-      position: 'start',
+      position,
+      pieceTheme: 'https://chessboardjs.com/img/chesspieces/'+themeName+'/{piece}.png',
       draggable: true,
       onDragStart: handleDragStart,
       onDrop: handleDrop,
@@ -65,8 +61,42 @@
       arrowWidth: 5,
       highlightColor: 'rgba(255,255,0,0.4)'
     });
+  }
+
+  /**
+   * Initialize the Chess Tutor application
+   */
+  function init() {
+    ChessApp.game = new Chess();
+
+    // Check if user has a saved theme preference
+    const savedTheme = localStorage.getItem('chessTheme');
+    if (savedTheme) {
+        // Update the theme selector dropdown
+        const themeSelector = document.getElementById('pieceStyle');
+        // Only set the value if this option exists in the dropdown
+		if ([...themeSelector.options].some(opt => opt.value === savedTheme)) {
+			themeSelector.value = savedTheme;
+		}
+    }
+    
+    createBoard('start', savedTheme || 'wikipedia');
 
     bindControls();
+  }
+
+  // Change the theme of the chessboard
+  function changeTheme(themeName) {
+    // Store the current position
+    const currentPosition = ChessApp.board.position();
+    
+    // Destroy the old board
+    ChessApp.board.destroy();
+    
+    createBoard(currentPosition, themeName);
+    
+    // Save preference to localStorage for next visit
+    localStorage.setItem('chessTheme', themeName);
   }
 
   /**
@@ -85,9 +115,7 @@
     });
 
     document.getElementById('pieceStyle').addEventListener('change', e => {
-      const style = e.target.value.toLowerCase();
-      ChessApp.board.pieceTheme = `assets/images/chesspieces/${style}/{piece}.png`;
-      ChessApp.board.position(ChessApp.game.fen());
+      changeTheme(e.target.value);
     });
   }
 
