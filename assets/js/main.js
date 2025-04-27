@@ -41,7 +41,7 @@
     // @type {string} element ID for chessboard container
     ChessApp.board = Chessboard('chessboard', {
       position,
-      pieceTheme: 'https://chessboardjs.com/img/chesspieces/'+themeName+'/{piece}.png',
+      pieceTheme: themeName == 'custom' ? 'assets/img/custom/{piece}.png' : 'https://chessboardjs.com/img/chesspieces/'+themeName+'/{piece}.png',
       draggable: true,
       onDragStart: handleDragStart,
       onDrop: handleDrop,
